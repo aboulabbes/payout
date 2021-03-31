@@ -59,21 +59,20 @@ class payoutController
 
             if(is_array($payouts) && array_key_exists($seller,$payouts)
                 && array_key_exists($currency,$payouts[$seller])){
-
-                $payout = $payouts[$seller][$currency];
-
-                if(Payout::CONSTANT > $payout->getAmount()+ $amount)
+                $payout = array_shift($payouts[$seller][$currency]);
+                if(Payout::CONSTANT >= ($payout->getAmount()+ $amount))
                 {
                     $payout->addItem($item);
-                    $payouts[$seller][$currency] = $payout;
-                    $payoutsList[]=$payout;
+                    array_unshift($payouts[$seller][$currency] ,$payout);
                 }else{
-                    $payoutsList[]=$payout;
-                    $payout = new Payout();
-                    $payout->setCurrency($currency);
-                    $payout->setSellerReference($seller);
-                    $payout->addItem($item);
-                    $payouts[$seller][$currency] = $payout;
+
+                    array_unshift($payouts[$seller][$currency] ,$payout);
+                    $payoutNew = new Payout();
+                    $payoutNew->setCurrency($currency);
+                    $payoutNew->setSellerReference($seller);
+                    $payoutNew->addItem($item);
+                    array_unshift($payouts[$seller][$currency] ,$payoutNew);
+
                 }
             }else
             {
@@ -81,20 +80,24 @@ class payoutController
                 $payout->setCurrency($currency);
                 $payout->setSellerReference($seller);
                 $payout->addItem($item);
-                $payouts[$seller][$currency] = $payout;
+                $payouts[$seller][$currency] = [];
+                array_unshift($payouts[$seller][$currency] ,$payout);
 
             }
         }
 
 
         foreach ($payouts as $sellerList) {
-            foreach ($sellerList as $payout) {
-                $entityManager->persist($payout);
-                $payoutsList[]=$payout;
+            foreach ($sellerList as $payoutCurrency) {
+                foreach ($payoutCurrency as $payout) {
+                    $entityManager->persist($payout);
+                    $payoutsList[]=$payout;
+                }
             }
+            $entityManager->flush();
         }
 
-        $entityManager->flush();
+
         return new JsonResponse(
             $serializer->serialize($payoutsList, "json"),
             JsonResponse::HTTP_CREATED,

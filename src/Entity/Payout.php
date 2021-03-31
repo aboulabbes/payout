@@ -19,7 +19,7 @@ class Payout
     /**
      * @var float
      */
-    const CONSTANT = 20.0;
+    const CONSTANT = 100.0;
 
     /**
      * @var int
