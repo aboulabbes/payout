@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 /**
@@ -42,14 +43,26 @@ class payoutController
      * @param SerializerInterface $serializer
      * @param UrlGeneratorInterface $urlGenerator
      * @param EntityManagerInterface $entityManager
+     * @param ValidatorInterface $validator
      * @return JsonResponse
      */
     public function post(Request $request,SerializerInterface $serializer,
                          UrlGeneratorInterface $urlGenerator,
-                         EntityManagerInterface $entityManager): JsonResponse {
+                         EntityManagerInterface $entityManager,
+                         ValidatorInterface $validator): JsonResponse {
 
+        try {
+            $items = $serializer->deserialize($request->getContent(),'App\Entity\Item[]','json');
+        }
+        catch(\Exception $e){
+                return new JsonResponse($serializer->serialize($e->getMessage(), 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+        $errors = $validator->validate($items);
 
-        $items = $serializer->deserialize($request->getContent(),'App\Entity\Item[]','json');
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
         $payouts = [];
         $payoutsList = [];
         foreach ($items as $item){
@@ -86,7 +99,6 @@ class payoutController
             }
         }
 
-
         foreach ($payouts as $sellerList) {
             foreach ($sellerList as $payoutCurrency) {
                 foreach ($payoutCurrency as $payout) {
@@ -96,7 +108,6 @@ class payoutController
             }
             $entityManager->flush();
         }
-
 
         return new JsonResponse(
             $serializer->serialize($payoutsList, "json"),

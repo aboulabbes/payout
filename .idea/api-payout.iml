@@ -107,6 +107,8 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/phpunit/php-file-iterator" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/deprecation-contracts" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/maker-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/validator" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/translation-contracts" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

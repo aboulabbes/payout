@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class Payout
@@ -38,6 +39,7 @@ class Payout
     /**
      * @var float
      * @ORM\Column(type="float")
+     * @Assert\Positive
      */
     private  float $amount;
 
@@ -97,6 +99,7 @@ class Payout
 
     /**
      * @param float $amount
+     *
      */
     public function setAmount(float $amount): void
     {

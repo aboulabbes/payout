@@ -62,7 +62,7 @@ class ApiPostTest extends TestCase
 
         for ($i = 0; $i < 2; $i++) {
             $itemName = 'ObjectItem' . rand(0, 999);
-            $seller = 'seller' . rand(0, 5);
+            $seller = 'seller';
             $rand_keys = array_rand($tabCurrency, 1);
             $currency = $tabCurrency[$rand_keys];
 
@@ -94,7 +94,7 @@ class ApiPostTest extends TestCase
 
         for ($i = 0; $i < 2; $i++) {
             $itemName = 'ObjectItem' . rand(0, 999);
-            $seller = 'seller' . rand(0, 5);
+            $seller = 'seller';
             $rand_keys = array_rand($tabCurrency, 1);
             $currency = $tabCurrency[$rand_keys];
 
@@ -107,14 +107,43 @@ class ApiPostTest extends TestCase
 
         }
 
+
         $dataHttp = array('json' => $data);
         $response = $this->client->post('/api/payout',$dataHttp);
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertTrue($response->hasHeader('Location'));
         $payoutList = json_decode($response->getBody(), true);
         $this->assertIsArray( $payoutList,"assert variable is array or not");
-        $this->assertCount($expectedCount,$payoutList, "payout List doesn't contains 1 elements"
-        );
+        $this->assertCount($expectedCount,$payoutList, "payout List doesn't contains 1 elements");
+
+    }
+
+
+    public function testItemsAmountErrorPost(): void
+    {
+        $data = [];
+        $tabCurrency = ['EUR'];
+
+        for ($i = 0; $i < 2; $i++) {
+            $itemName = 'ObjectItem' . rand(0, 999);
+            $seller = 'seller' . rand(0, 5);
+            $rand_keys = array_rand($tabCurrency, 1);
+            $currency = $tabCurrency[$rand_keys];
+
+            $data[] = array(
+                'item' => $itemName,
+                'priceCurrency' => $currency,
+                'priceAmount' => "AA",
+                'sellerReference' => $seller
+            );
+
+        }
+
+        $dataHttp = array('json' => $data);
+        $response = $this->client->post('/api/payout',$dataHttp);
+        $this->assertEquals(400, $response->getStatusCode());
+
+
 
     }
 }
